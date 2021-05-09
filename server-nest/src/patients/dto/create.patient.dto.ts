@@ -4,28 +4,27 @@ import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreatePatientDto {
+    @ApiProperty()
+    @IsString()
+    name: string;
 
-  @ApiProperty()
-  @IsString()
-  name: string;
+    @ApiProperty()
+    @IsString()
+    surname: string;
 
-  @ApiProperty()
-  @IsString()
-  surname: string;
+    @ApiProperty()
+    @IsString()
+    personalIdentityNumber: string;
 
-  @ApiProperty()
-  @IsString()
-  personalIdentityNumber: string;
+    @ApiProperty()
+    @Type(() => Date)
+    dateBirth: Date;
 
-  @ApiProperty()
-  @Type(() => Date)
-  dateBirth: Date;
+    @ApiProperty()
+    @IsString()
+    phoneNumber: string;
 
-  @ApiProperty()
-  @IsString()
-  phoneNumber: string;
-
-  @ApiProperty()
-  @Type(() => AddressDto)
-  address: AddressDto;
+    @ApiProperty()
+    @Type(() => AddressDto)
+    address: AddressDto;
 }
