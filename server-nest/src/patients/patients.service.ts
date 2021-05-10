@@ -6,7 +6,6 @@ import { UpdatePatientDto } from './dto/update.patient.dto';
 @Injectable()
 export class PatientsService {
     createNew(patient: CreatePatientDto) {
-        console.log(patient);
         return patient;
     }
 

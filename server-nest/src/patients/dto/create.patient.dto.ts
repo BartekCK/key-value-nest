@@ -1,6 +1,6 @@
 import { AddressDto } from '../../common/dto/address.dto';
 import { IsDate, IsDefined, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreatePatientDto {
