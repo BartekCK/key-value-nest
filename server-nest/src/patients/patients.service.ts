@@ -5,20 +5,24 @@ import { UpdatePatientDto } from './dto/update.patient.dto';
 
 @Injectable()
 export class PatientsService {
+    createNew(patient: CreatePatientDto) {
+        console.log(patient);
+        return patient;
+    }
+
     deleteById(id: number) {
-        throw new Error('Method not implemented.');
+        return id;
     }
 
     updateById(id: number, patient: UpdatePatientDto) {
-        throw new Error('Method not implemented.');
+        return patient;
     }
+
     findAll(query: PaginationPatientDto) {
-        throw new Error('Method not implemented.');
+        return query;
     }
+
     findById(id: number) {
-        throw new Error('Method not implemented.');
-    }
-    createNew(patient: CreatePatientDto) {
-        throw new Error('Method not implemented.');
+        return id;
     }
 }
