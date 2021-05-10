@@ -18,9 +18,10 @@ export class PatientsController {
         return this.patientsService.createNew(patient);
     }
 
-    @Get(':id')
-    getPatientById(@Param('id') id: number) {
-        return this.patientsService.findById(id);
+    @Patch(':id')
+    @UsePipes(TrimPipe, DeleteEmptyStringPipe, new ValidationPipe({ whitelist: true, transform: true }))
+    updatePatient(@Param('id') id: number, @Body() patient: UpdatePatientDto) {
+        return this.patientsService.updateById(id, patient);
     }
 
     @Get()
@@ -29,9 +30,9 @@ export class PatientsController {
         return this.patientsService.findAll(query);
     }
 
-    @Patch(':id')
-    updatePatient(@Param('id') id: number, @Body() patient: UpdatePatientDto) {
-        return this.patientsService.updateById(id, patient);
+    @Get(':id')
+    getPatientById(@Param('id') id: number) {
+        return this.patientsService.findById(id);
     }
 
     @Delete(':id')
