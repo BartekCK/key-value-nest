@@ -22,10 +22,14 @@ export class PatientsService {
     }
 
     async makeQuery(query: PaginationPatientDto): Promise<Patient[]> {
-        return await this.repository.query(query)
+        return await this.repository.query(query);
     }
 
     async findById(id: string) {
         return await this.repository.get(id);
+    }
+
+    async findAll() {
+        return await this.repository.getAll();
     }
 }

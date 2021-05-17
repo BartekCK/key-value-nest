@@ -1,5 +1,6 @@
 import { Address } from '../../common/models/address.model';
 import { CreatePatientDto } from '../dto/create.patient.dto';
+import { Vaccination } from '../../common/models/vaccination.model';
 
 export class Patient {
     constructor({ address, dateBirth, name, personalIdentityNumber, phoneNumber, surname }: CreatePatientDto) {
@@ -17,4 +18,5 @@ export class Patient {
     dateBirth: Date;
     phoneNumber: string;
     address: Address;
+    vaccinationReservations: Vaccination[] = [];
 }

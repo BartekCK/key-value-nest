@@ -7,5 +7,6 @@ import { DatabaseModule } from '../database/database.module';
     imports: [DatabaseModule.forFeature('patients')],
     providers: [PatientsService],
     controllers: [PatientsController],
+    exports: [PatientsService],
 })
 export class PatientsModule {}

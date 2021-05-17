@@ -1,5 +1,4 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { DatabaseService } from './database.service';
 import { DbOptionsInterface } from './interfaces/db.options.interface';
 import { Client } from 'hazelcast-client';
 import { HazelcastClient } from 'hazelcast-client/lib/HazelcastClient';
