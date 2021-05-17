@@ -19,8 +19,8 @@ export class PatientsController {
     }
 
     @Patch(':id')
-    @UsePipes(TrimPipe, DeleteEmptyStringPipe, new ValidationPipe({ whitelist: true, transform: true }))
-    updatePatient(@Param('id') id: number, @Body() patient: UpdatePatientDto) {
+    @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+    updatePatient(@Param('id') id: string, @Body() patient: UpdatePatientDto) {
         return this.patientsService.updateById(id, patient);
     }
 

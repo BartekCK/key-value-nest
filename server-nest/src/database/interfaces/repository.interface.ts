@@ -5,6 +5,6 @@ export interface Repository<T> {
     get: (key: string) => Promise<T>;
     getAll: () => Promise<T[]>;
     query: (entity: Partial<T>) => Promise<T[]>;
-    update: (key: string, entity: T) => any;
+    update: (key: string, entity: Partial<T | any>) => any;
     delete: (key: string) => any;
 }

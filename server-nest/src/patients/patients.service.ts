@@ -17,8 +17,8 @@ export class PatientsService {
         this.repository.delete(id);
     }
 
-    updateById(id: number, patient: UpdatePatientDto) {
-        return patient;
+    updateById(id: string, patient: UpdatePatientDto) {
+        return this.repository.update(id, { ...patient });
     }
 
     async makeQuery(query: PaginationPatientDto): Promise<Patient[]> {
