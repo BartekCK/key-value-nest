@@ -1,16 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreatePatientDto } from './dto/create.patient.dto';
 import { PaginationPatientDto } from './dto/pagination.patient.dto';
 import { UpdatePatientDto } from './dto/update.patient.dto';
+import { KeyValue, Repository } from '../database/interfaces/repository.interface';
+import { Patient } from './models/patient.model';
 
 @Injectable()
 export class PatientsService {
-    createNew(patient: CreatePatientDto) {
-        return patient;
+    constructor(@Inject('HAZELCAST_DB') private readonly repository: Repository<Patient>) {}
+
+    async createNew(patient: CreatePatientDto): Promise<KeyValue<Patient>> {
+        return await this.repository.put(new Patient({ ...patient }));
     }
 
-    deleteById(id: number) {
-        return id;
+    async deleteById(id: string): Promise<void> {
+        this.repository.delete(id);
     }
 
     updateById(id: number, patient: UpdatePatientDto) {
@@ -21,7 +25,7 @@ export class PatientsService {
         return query;
     }
 
-    findById(id: number) {
-        return id;
+    async findById(id: string) {
+        return await this.repository.get(id);
     }
 }

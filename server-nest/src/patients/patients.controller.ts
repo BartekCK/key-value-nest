@@ -31,12 +31,14 @@ export class PatientsController {
     }
 
     @Get(':id')
-    getPatientById(@Param('id') id: number) {
+    @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+    getPatientById(@Param('id') id: string) {
         return this.patientsService.findById(id);
     }
 
     @Delete(':id')
-    deletePatientById(@Param('id') id: number) {
+    @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+    deletePatientById(@Param('id') id: string) {
         return this.patientsService.deleteById(id);
     }
 }
