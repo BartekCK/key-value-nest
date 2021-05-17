@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { KeyValue, Repository } from '../interfaces/repository.interface';
 import { HazelcastClient } from 'hazelcast-client/lib/HazelcastClient';
-import { IMap } from 'hazelcast-client';
+import { IMap, Predicates } from 'hazelcast-client';
 import { v4 as uuidv4 } from 'uuid';
+import { map } from 'rxjs/operators';
+import { Predicate } from 'hazelcast-client/lib/core/Predicate';
 
 @Injectable()
 export class HazelcastProvider<T> implements Repository<T> {
@@ -21,11 +23,23 @@ export class HazelcastProvider<T> implements Repository<T> {
         return this.map.get(key);
     }
 
-    query(entity: Partial<T>): Promise<T[]> {
-        return Promise.resolve([]);
+    async getAll(): Promise<T[]> {
+        return (await this.map.values()).toArray();
     }
 
-    update(key: string, entity: T): any {}
+    async query(entity: Partial<T>): Promise<T[]> {
+        // console.log(entity);
+        const predicates: Predicate[] = Object.entries(entity).reduce((prev: Predicate[], [key, value]) => {
+            if (value) {
+                return [...prev, Predicates.equal(key, value)];
+            }
+            return prev;
+        }, []);
+        const criteriaQuery = Predicates.and(...predicates);
+        return (await this.map.valuesWithPredicate(criteriaQuery)).toArray();
+    }
+
+    async update(key: string, entity: T): Promise<any> {}
 
     async delete(key: string): Promise<void> {
         await this.map.delete(key);

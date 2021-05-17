@@ -25,9 +25,9 @@ export class PatientsController {
     }
 
     @Get()
-    @UsePipes(TrimPipe, DeleteEmptyStringPipe, new ValidationPipe({ whitelist: true, transform: true }))
+    @UsePipes(TrimPipe, DeleteEmptyStringPipe)
     getAllPatients(@Query() query: PaginationPatientDto) {
-        return this.patientsService.findAll(query);
+        return this.patientsService.makeQuery(query);
     }
 
     @Get(':id')

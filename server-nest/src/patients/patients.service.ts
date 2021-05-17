@@ -21,8 +21,8 @@ export class PatientsService {
         return patient;
     }
 
-    findAll(query: PaginationPatientDto) {
-        return query;
+    async makeQuery(query: PaginationPatientDto): Promise<Patient[]> {
+        return await this.repository.query(query)
     }
 
     async findById(id: string) {
