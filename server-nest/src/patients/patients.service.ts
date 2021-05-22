@@ -7,7 +7,7 @@ import { Patient } from './models/patient.model';
 
 @Injectable()
 export class PatientsService {
-    constructor(@Inject('HAZELCAST_DB') private readonly repository: Repository<Patient>) {}
+    constructor(@Inject('REPOSITORY') private readonly repository: Repository<Patient>) {}
 
     async createNew(patient: CreatePatientDto): Promise<KeyValue<Patient>> {
         return await this.repository.put(new Patient({ ...patient }));
