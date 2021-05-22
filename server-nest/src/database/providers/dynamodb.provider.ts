@@ -1,7 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { KeyValue, Repository } from '../interfaces/repository.interface';
 import { v4 as uuidv4 } from 'uuid';
-import { DocumentClient, GetItemOutput, PutItemInput, PutItemInputAttributeMap, ScanOutput } from 'aws-sdk/clients/dynamodb';
+import {
+    DeleteItemOutput,
+    DocumentClient,
+    GetItemOutput,
+    PutItemInput,
+    PutItemInputAttributeMap,
+    ScanOutput,
+    UpdateItemInput,
+    UpdateItemOutput,
+} from 'aws-sdk/clients/dynamodb';
 
 @Injectable()
 export class DynamoDbProvider<T> implements Repository<T> {
@@ -26,6 +35,7 @@ export class DynamoDbProvider<T> implements Repository<T> {
 
     async get(key: string): Promise<T> {
         const result: GetItemOutput = await this.docClient.get({ TableName: this.docName, Key: { key } }).promise();
+        this.checkIsExist(key, result);
         return (result.Item as unknown) as T;
     }
 
@@ -34,18 +44,56 @@ export class DynamoDbProvider<T> implements Repository<T> {
             TableName: this.docName,
         };
         const result: ScanOutput = await this.docClient.scan(params).promise();
-        return result.Items as unknown as T[];
+        return (result.Items as unknown) as T[];
     }
 
     async query(entity: Partial<T>): Promise<T[]> {
         return this.getAll();
     }
 
-    async update(key: string, entity: Partial<T | any>): Promise<any> {}
+    async update(key: string, entity: Partial<T | any>): Promise<any> {
+        const createExpression = (entity) => {
+            if (entity.vaccinationReservations) {
+                return { ':s': entity.surname, ':v': entity.vaccinationReservations };
+            }
+            return { ':s': entity.surname };
+        };
 
-    async delete(key: string): Promise<void> {}
+        const createUpdateExpression = (entity): string => {
+            if (entity.vaccinationReservations) {
+                return 'set surname=:s, vaccinationReservations=:v';
+            }
+            return 'set surname=:s';
+        };
+
+        const params: UpdateItemInput = {
+            TableName: this.docName,
+            // @ts-ignore
+            Key: { key },
+            UpdateExpression: createUpdateExpression(entity),
+            ExpressionAttributeValues: createExpression(entity),
+            ReturnValues: 'ALL_NEW',
+        };
+
+        const result: UpdateItemOutput = await this.docClient.update(params).promise();
+        return result.Attributes;
+    }
+
+    async delete(key: string): Promise<void> {
+        const params = {
+            TableName: this.docName,
+            Key: { key },
+        };
+        const result: DeleteItemOutput = await this.docClient.delete(params).promise();
+    }
 
     private generateId(): string {
         return uuidv4();
+    }
+
+    private checkIsExist(key: string, obj: Object) {
+        if (Object.keys(obj).length === 0) {
+            throw new NotFoundException(`Patient by key ${key} not found`);
+        }
     }
 }
