@@ -26,13 +26,16 @@ export class VaccinationService {
         const result: Patient = patients.find(
             (elPatient) =>
                 elPatient.vaccinationReservations &&
-                elPatient.vaccinationReservations.find((el) => new Date(el.date).getTime() === new Date(roundDate).getTime()),
+                elPatient.vaccinationReservations.find(
+                    (el) => new Date(el.date).getTime() === new Date(roundDate).getTime(),
+                ),
         );
         if (result) {
             throw new ConflictException(`${roundDate} is busy`);
         }
         patient.vaccinationReservations.push(new Vaccination(count, this.roundMinutes(date)));
-        this.patientService.updateById(id, { ...patient });
+        // @ts-ignore
+        this.patientService.updateById(id, { vaccinationReservations: patient.vaccinationReservations });
     }
 
     private roundMinutes(date: Date) {

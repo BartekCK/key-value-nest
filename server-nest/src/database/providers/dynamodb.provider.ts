@@ -95,19 +95,28 @@ export class DynamoDbProvider<T> implements Repository<T> {
         return result.Items as any;
     }
 
-    async update(key: string, entity: Partial<T | any>): Promise<any> {
+    async update(key: string, entityObj: Partial<T | any>): Promise<any> {
+        const entity: any = JSON.parse(JSON.stringify(entityObj));
         const createExpression = (entity) => {
-            if (entity.vaccinationReservations) {
-                return { ':s': entity.surname, ':v': entity.vaccinationReservations };
+            if (entity.surname && !entity.vaccinationReservations) {
+                return { ':s': entity.surname };
             }
-            return { ':s': entity.surname };
+            if (!entity.surname && entity.vaccinationReservations) {
+                return { ':v': entity.vaccinationReservations };
+            }
+
+            return { ':s': entity.surname, ':v': entity.vaccinationReservations };
         };
 
         const createUpdateExpression = (entity): string => {
-            if (entity.vaccinationReservations) {
-                return 'set surname=:s, vaccinationReservations=:v';
+            if (entity.surname && !entity.vaccinationReservations) {
+                return 'set surname=:s';
             }
-            return 'set surname=:s';
+            if (!entity.surname && entity.vaccinationReservations) {
+                return 'set vaccinationReservations=:v';
+            }
+            return 'set surname=:s, vaccinationReservations=:v';
+
         };
 
         const params: UpdateItemInput = {
@@ -121,6 +130,8 @@ export class DynamoDbProvider<T> implements Repository<T> {
 
         const result: UpdateItemOutput = await this.docClient.update(params).promise();
         return result.Attributes;
+
+        // return Promise.resolve({})
     }
 
     async delete(key: string): Promise<void> {
