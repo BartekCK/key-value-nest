@@ -7,6 +7,9 @@ import {
     GetItemOutput,
     PutItemInput,
     PutItemInputAttributeMap,
+    QueryInput,
+    QueryOutput,
+    ScanInput,
     ScanOutput,
     UpdateItemInput,
     UpdateItemOutput,
@@ -48,7 +51,48 @@ export class DynamoDbProvider<T> implements Repository<T> {
     }
 
     async query(entity: Partial<T>): Promise<T[]> {
-        return this.getAll();
+        try {
+            this.checkIsExist('', entity);
+        } catch (e) {
+            return this.getAll();
+        }
+
+        const createFilter = (entity): string => {
+            if (entity.name && !entity.surname) {
+                return '#na = :naa';
+            }
+            if (!entity.name && entity.surname) {
+                return 'surname = :sur';
+            }
+            return '#na = :naa and surname = :sur';
+        };
+
+        const createExpression = (entity): any => {
+            if (entity.name && !entity.surname) {
+                return {
+                    ':naa': entity.name,
+                };
+            }
+            if (!entity.name && entity.surname) {
+                return {
+                    ':sur': entity.surname,
+                };
+            }
+            return {
+                ':naa': entity.name,
+                ':sur': entity.surname,
+            };
+        };
+
+        const params: ScanInput | any = {
+            TableName: this.docName,
+            FilterExpression: createFilter(entity),
+            // @ts-ignore
+            ExpressionAttributeNames: entity.name && { '#na': 'name' },
+            ExpressionAttributeValues: createExpression(entity),
+        };
+        const result: ScanOutput = await this.docClient.scan(params).promise();
+        return result.Items as any;
     }
 
     async update(key: string, entity: Partial<T | any>): Promise<any> {
