@@ -1,12 +1,16 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, NotImplementedException } from '@nestjs/common';
 import { CreateVaccinationDto } from './dto/createVaccinationDto';
 import { PatientsService } from '../patients/patients.service';
 import { Patient } from '../patients/models/patient.model';
 import { Vaccination } from '../common/models/vaccination.model';
+import { Repository } from '../database/interfaces/repository.interface';
+import { DynamoDbProvider } from '../database/providers/dynamodb.provider';
+import { DeleteItemInput, DeleteItemOutput, ScanInput } from 'aws-sdk/clients/dynamodb';
 
 @Injectable()
 export class VaccinationService {
     constructor(private readonly patientService: PatientsService) {}
+
     async createNewTherm(id: string, createVacDto: CreateVaccinationDto) {
         const { count, date } = createVacDto;
         const patient: Patient = await this.patientService.findById(id);
@@ -51,10 +55,9 @@ export class VaccinationService {
         );
         console.timeEnd('Service processing');
     }
-    cleanUsedVaccinationDb() {
-        console.time('Db processing');
 
-        console.timeEnd('Db processing');
+    async cleanUsedVaccinationDb() {
+       await this.patientService.dbProcessing();
     }
 
     private roundMinutes(date: Date) {

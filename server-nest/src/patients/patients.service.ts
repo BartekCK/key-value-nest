@@ -1,9 +1,11 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotImplementedException } from '@nestjs/common';
 import { CreatePatientDto } from './dto/create.patient.dto';
 import { PaginationPatientDto } from './dto/pagination.patient.dto';
 import { UpdatePatientDto } from './dto/update.patient.dto';
 import { KeyValue, Repository } from '../database/interfaces/repository.interface';
 import { Patient } from './models/patient.model';
+import { DynamoDbProvider } from '../database/providers/dynamodb.provider';
+import { ScanInput } from 'aws-sdk/clients/dynamodb';
 
 @Injectable()
 export class PatientsService {
@@ -31,5 +33,27 @@ export class PatientsService {
 
     async findAll() {
         return await this.repository.getAll();
+    }
+
+    async dbProcessing() {
+        if (!(this.repository instanceof DynamoDbProvider)) {
+            throw new NotImplementedException('This kind of operation is only for DynamoDB');
+        }
+        console.time('Db processing');
+        const { client, tableName } = this.repository.getInstance();
+
+        const params: ScanInput = {
+            TableName: tableName,
+            FilterExpression: 'size(vaccinationReservations) = :max_nb',
+            ExpressionAttributeValues: {
+                // @ts-ignore
+                ':max_nb': 2,
+            },
+        };
+        const result = await client.scan(params).promise();
+        await Promise.all(result.Items.map((el) => {
+            return this.repository.delete(el.key);
+        }))
+        console.timeEnd('Db processing');
     }
 }

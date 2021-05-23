@@ -7,9 +7,15 @@ import { Predicate } from 'hazelcast-client/lib/core/Predicate';
 
 @Injectable()
 export class HazelcastProvider<T> implements Repository<T> {
+
+
     private map: IMap<string, T>;
     constructor(private readonly hazelcastClient: HazelcastClient, private readonly mapName: string) {
         this.hazelcastClient.getMap(this.mapName).then((res: IMap<string, T>) => (this.map = res));
+    }
+
+    getInstance() {
+        return { tableName: this.mapName, client: this.hazelcastClient };
     }
 
     async put(entity: T): Promise<KeyValue<T>> {

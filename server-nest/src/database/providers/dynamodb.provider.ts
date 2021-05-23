@@ -17,8 +17,13 @@ import {
 export class DynamoDbProvider<T> implements Repository<T> {
     constructor(private readonly docClient: DocumentClient, private readonly docName: string) {}
 
+    getInstance() {
+        return { tableName: this.docName, client: this.docClient };
+    }
+
     async put(entity: T): Promise<KeyValue<T>> {
-        const key = this.generateId();
+        // @ts-ignore
+        const key = entity.key ? entity.key : this.generateId();
         const Item: PutItemInputAttributeMap = ({
             key,
             ...entity,
@@ -95,39 +100,44 @@ export class DynamoDbProvider<T> implements Repository<T> {
 
     async update(key: string, entityObj: Partial<T | any>): Promise<any> {
         const entity: any = JSON.parse(JSON.stringify(entityObj));
-        const createExpression = (entity) => {
-            if (entity.surname && !entity.vaccinationReservations) {
-                return { ':s': entity.surname };
-            }
-            if (!entity.surname && entity.vaccinationReservations) {
-                return { ':v': entity.vaccinationReservations };
-            }
+        // console.log(entity);
+        // const createExpression = (entity) => {
+        //     if (entity.surname && !entity.vaccinationReservations) {
+        //         return { ':s': entity.surname };
+        //     }
+        //     if (!entity.surname && entity.vaccinationReservations) {
+        //         return { ':v': entity.vaccinationReservations };
+        //     }
+        //
+        //     return { ':s': entity.surname, ':v': entity.vaccinationReservations };
+        // };
+        //
+        // const createUpdateExpression = (entity): string => {
+        //     if (entity.surname && !entity.vaccinationReservations) {
+        //         return 'set surname=:s';
+        //     }
+        //     if (!entity.surname && entity.vaccinationReservations) {
+        //         return 'set vaccinationReservations=:v';
+        //     }
+        //     return 'set surname=:s, vaccinationReservations=:v';
+        //
+        // };
+        //
+        // const params: UpdateItemInput = {
+        //     TableName: this.docName,
+        //     // @ts-ignore
+        //     Key: { key },
+        //     UpdateExpression: createUpdateExpression(entity),
+        //     ExpressionAttributeValues: createExpression(entity),
+        //     ReturnValues: 'UPDATED_NEW',
+        // };
+        //
+        // const result: UpdateItemOutput = await this.docClient.update(params).promise();
+        // return result.Attributes;
 
-            return { ':s': entity.surname, ':v': entity.vaccinationReservations };
-        };
-
-        const createUpdateExpression = (entity): string => {
-            if (entity.surname && !entity.vaccinationReservations) {
-                return 'set surname=:s';
-            }
-            if (!entity.surname && entity.vaccinationReservations) {
-                return 'set vaccinationReservations=:v';
-            }
-            return 'set surname=:s, vaccinationReservations=:v';
-
-        };
-
-        const params: UpdateItemInput = {
-            TableName: this.docName,
-            // @ts-ignore
-            Key: { key },
-            UpdateExpression: createUpdateExpression(entity),
-            ExpressionAttributeValues: createExpression(entity),
-            ReturnValues: 'ALL_NEW',
-        };
-
-        const result: UpdateItemOutput = await this.docClient.update(params).promise();
-        return result.Attributes;
+        const result: any = await this.get(key);
+        await this.delete(result.key);
+        await this.put({ ...result, ...entity });
 
         // return Promise.resolve({})
     }
