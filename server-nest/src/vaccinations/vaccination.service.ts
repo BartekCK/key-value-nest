@@ -38,6 +38,25 @@ export class VaccinationService {
         this.patientService.updateById(id, { vaccinationReservations: patient.vaccinationReservations });
     }
 
+    async cleanUsedVaccinationService() {
+        console.time('Service processing');
+        const patients: any[] = await this.patientService.findAll();
+        await Promise.all(
+            patients.map(async (el) => {
+                if (el.vaccinationReservations && el.vaccinationReservations.length === 2) {
+                    return await this.patientService.deleteById(el.key);
+                }
+                return Promise.resolve({});
+            }),
+        );
+        console.timeEnd('Service processing');
+    }
+    cleanUsedVaccinationDb() {
+        console.time('Db processing');
+
+        console.timeEnd('Db processing');
+    }
+
     private roundMinutes(date: Date) {
         date.setHours(date.getHours() + Math.round(date.getMinutes() / 60));
         date.setMinutes(0, 0, 0);

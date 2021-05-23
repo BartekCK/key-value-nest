@@ -12,4 +12,14 @@ export class VaccinationController {
     async saveVaccination(@Param('userId') userId: string, @Body() createVacDto: CreateVaccinationDto) {
         await this.vaccinationService.createNewTherm(userId, createVacDto);
     }
+
+    @Post('/clean/db')
+    async cleanUsedVaccinationDb() {
+        await this.vaccinationService.cleanUsedVaccinationDb();
+    }
+
+    @Post('/clean/service')
+    async cleanUsedVaccinationService() {
+        await this.vaccinationService.cleanUsedVaccinationService();
+    }
 }

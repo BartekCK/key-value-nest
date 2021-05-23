@@ -7,8 +7,6 @@ import {
     GetItemOutput,
     PutItemInput,
     PutItemInputAttributeMap,
-    QueryInput,
-    QueryOutput,
     ScanInput,
     ScanOutput,
     UpdateItemInput,
